@@ -13,7 +13,7 @@ class ColorizationDataset(Dataset):
         if split == 'train':
             self.transforms = transforms.Compose([
                 transforms.Resize((SIZE, SIZE),  Image.BICUBIC),
-                # TODO: A little data augmentation FLIPS?!
+                transforms.RandomHorizontalFlip(),# TODO: A little data augmentation FLIPS?!
             ])
         elif split == 'val':
             self.transforms = transforms.Resize((SIZE, SIZE),  Image.BICUBIC)
@@ -24,10 +24,10 @@ class ColorizationDataset(Dataset):
 
     def __getitem__(self, idx):
         img = Image.open(self.paths[idx]).convert("RGB")
-        # TODO: apply transforms 
+        img = self.transforms(img) # TODO: apply transforms
         img = np.array(img)
         img_lab = rgb2lab(img).astype("float32") # Converting RGB to L*a*b
-        # TODO: convert to tensor 
+        img_lab = transforms.ToTensor()(img_lab)# TODO: convert to tensor
 
         L = img_lab[[0], ...] / 50. - 1. # Between -1 and 1
         ab = img_lab[[1, 2], ...] / 110. # Between -1 and 1
